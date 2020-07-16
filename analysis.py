@@ -55,16 +55,40 @@ class LittleWomen:
         heap = self.createWordHeap(file_name)
         return [[element[1], element[0]] for element in heapq.nsmallest(NUMBER_OF_ELEMENTS, heap)]
     
-    def getFrequencyOfWord(self, file_name):
+    def getFrequencyOfWord(self, file_name, word):
+        word = word.lower()
         data = self.readFile(file_name)
         chapter_split = data.split("chapter")
-        print(chapter_split)
-        return
+        freq_of_word = [0]*(len(chapter_split)-1)
+        for index, chapter in enumerate(chapter_split):
+            all_words = chapter.split()
+            words_counter = Counter(all_words)
+
+            freq_of_word[index-1] = words_counter[word]
+
+        return freq_of_word
+
+    def getChapterQuoteAppears(self, file_name, quote):
+        quote = quote.translate(self.remove).lower()
+        data = self.readFile(file_name)
+
+        chapter_split = data.split("chapter")
+
+        for index, chapter in enumerate(chapter_split):
+            if quote in chapter:
+                return index - 1
+        
+        return -1
+
+
+
+    
 
 little_women = LittleWomen()
 # print(little_women.getTotalNumberOfWords("little_women.txt"))
 # print(little_women.getTotalUniqueWords("little_women.txt"))
 # print(little_women.get20MostFrequentWords("little_women.txt"))
 #print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
-print(little_women.get20LeastFrequentWords("little_women.txt"))
-print(little_women.getFrequencyOfWord("little_women.txt"))
+# print(little_women.get20LeastFrequentWords("little_women.txt"))
+# print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
+print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
