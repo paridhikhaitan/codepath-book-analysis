@@ -21,38 +21,37 @@ class LittleWomen:
         unique_words = set(data.split())
         return len(unique_words)
 
-    def createWordHeap(self, file_name):
+    def createWordHeap(self, file_name, interesting):
         data = self.readFile(file_name)
         word_frequency = Counter(data.split())
-        heap = []
 
-        for key, value in word_frequency.items():
-            heapq.heappush(heap, (value, key))
-        
+        if interesting:
+            print("Printing interesting words")
+            common_file = open("100_common.txt", "r")
+            common_words = set(common_file.read().lower().split())
+            heap = []
+            for key, value in word_frequency.items():
+                if key not in common_words:
+                    heap.append((value, key))
+        else:
+            heap = [(value, key) for key, value in word_frequency.items()]
+
+        heapq.heapify(heap)
         return heap
 
     def get20MostFrequentWords(self, file_name):
         NUMBER_OF_ELEMENTS = 20
-        heap = self.createWordHeap(file_name)
+        heap = self.createWordHeap(file_name, False)
         return [[element[1], element[0]] for element in heapq.nlargest(NUMBER_OF_ELEMENTS, heap)]
 
     def get20MostInterestingFrequentWords(self, file_name):
-        common_file = open("100_common.txt", "r")
-        common_words = set(common_file.read().split())
-        data = self.readFile(file_name)
-        word_frequency = Counter(data.split())
         NUMBER_OF_ELEMENTS = 20
-        heap = []
-
-        for key, value in word_frequency.items():
-            if key not in common_words:
-                heapq.heappush(heap, (value, key))
-        
+        heap = self.createWordHeap(file_name, True)
         return [[element[1], element[0]] for element in heapq.nlargest(NUMBER_OF_ELEMENTS, heap)]
 
     def get20LeastFrequentWords(self, file_name):
         NUMBER_OF_ELEMENTS = 20
-        heap = self.createWordHeap(file_name)
+        heap = self.createWordHeap(file_name, False)
         return [[element[1], element[0]] for element in heapq.nsmallest(NUMBER_OF_ELEMENTS, heap)]
     
     def getFrequencyOfWord(self, file_name, word):
@@ -88,7 +87,7 @@ little_women = LittleWomen()
 # print(little_women.getTotalNumberOfWords("little_women.txt"))
 # print(little_women.getTotalUniqueWords("little_women.txt"))
 # print(little_women.get20MostFrequentWords("little_women.txt"))
-#print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
+# print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
 # print(little_women.get20LeastFrequentWords("little_women.txt"))
 # print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
-print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
+# print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
