@@ -12,21 +12,21 @@ class LittleWomen:
     def readFile(self, file_name):
         file_obj = open(file_name, "r")
         data = file_obj.read().translate(self.remove)
-        return data.lower()
+        return data
 
     def getTotalNumberOfWords(self, file_name):
         data = self.readFile(file_name)
-        total_words = data.split()
+        total_words = data.lower().split()
         return len(total_words)
 
     def getTotalUniqueWords(self, file_name):
         data = self.readFile(file_name)
-        unique_words = set(data.split())
+        unique_words = set(data.lower().split())
         return len(unique_words)
 
     def createWordHeap(self, file_name, interesting):
         data = self.readFile(file_name)
-        word_frequency = Counter(data.split())
+        word_frequency = Counter(data.lower().split())
 
         if interesting:
             print("Printing interesting words")
@@ -60,22 +60,21 @@ class LittleWomen:
     def getFrequencyOfWord(self, file_name, word):
         word = word.lower()
         data = self.readFile(file_name)
-        chapter_split = data.split("chapter")
-        freq_of_word = [0]*(len(chapter_split)-1)
+        print(data)
+        chapter_split = data.split("CHAPTER")
+        freq_of_word = [0]*len(chapter_split)
         for index, chapter in enumerate(chapter_split):
-            all_words = chapter.split()
+            all_words = chapter.lower().split()
             words_counter = Counter(all_words)
-
-            freq_of_word[index-1] = words_counter[word]
+            freq_of_word[index] = words_counter[word]
 
         return freq_of_word
 
     def getChapterQuoteAppears(self, file_name, quote):
-        quote = quote.translate(self.remove).lower()
+        quote = quote.translate(self.remove)
         data = self.readFile(file_name)
 
-        chapter_split = data.split("chapter")
-
+        chapter_split = data.split("CHAPTER")
         for index, chapter in enumerate(chapter_split):
             if quote in chapter:
                 return index - 1
@@ -113,13 +112,17 @@ class LittleWomen:
         data = re.split('(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)', data)
         self.root = TrieNode(-1)
 
+        for sentence in data:
+            self.createTree(sentence)
+        
+        self.allSentences(start_sentence)
+
     def createTree(self, sentence):
         temp = self.root
 
         for char in sentence:
             if char not in temp.children:
                 temp.children[char] = TrieNode(char)
-            
             temp = temp.children[char]
         
         temp.end_of_word = True
@@ -127,9 +130,28 @@ class LittleWomen:
     def allSentences(self, start_sentence):
 
         temp = self.root
+        result_sentences = []
 
-        for index, char in enumerate(start_sentence):
-            pass
+        def getTree():
+            temp = self.root
+            for char in start_sentence:
+                if char not in temp.children:
+                    return False
+                temp = temp.children[char]
+            
+        
+
+        def remainingSentences(root, temp_sentence):
+            if root.end_of_word == True:
+                result_sentences.append(start_sentence+temp_sentence)
+            
+            for child in root.children:
+                remainingSentences(root.children[child], temp_sentence+child)
+        
+        getTree()
+        remainingSentences(temp, "")
+        return result_sentences
+
 
 class TrieNode:
     def __init__(self, val):
@@ -143,7 +165,7 @@ little_women = LittleWomen()
 # print(little_women.get20MostFrequentWords("little_women.txt"))
 # print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
 # print(little_women.get20LeastFrequentWords("little_women.txt"))
-# print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
-# print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
+print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
+print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
 # print(little_women.generateSentence("little_women.txt"))
-print(little_women.getAutocompleteSentence("little_women.txt", "Hello"))
+# print(little_women.getAutocompleteSentence("little_women.txt", "\"It's"))
