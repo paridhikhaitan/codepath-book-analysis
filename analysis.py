@@ -29,7 +29,6 @@ class LittleWomen:
         word_frequency = Counter(data.lower().split())
 
         if interesting:
-            print("Printing interesting words")
             common_file = open("100_common.txt", "r")
             common_words = set(common_file.read().lower().split())
             heap = []
@@ -60,7 +59,6 @@ class LittleWomen:
     def getFrequencyOfWord(self, file_name, word):
         word = word.lower()
         data = self.readFile(file_name)
-        print(data)
         chapter_split = data.split("CHAPTER")
         freq_of_word = [0]*len(chapter_split)
         for index, chapter in enumerate(chapter_split):
@@ -95,7 +93,7 @@ class LittleWomen:
 
             word_dict[prev_word].append(curr_word_freq)
         
-        return self.createSentence("the", 20, word_dict)
+        return self.createSentence("The", 20, word_dict)
     
     def createSentence(self, word, sentence_len, word_dict):
         sentence = []
@@ -160,12 +158,12 @@ class TrieNode:
         self.end_of_word = False
 
 little_women = LittleWomen()
-# print(little_women.getTotalNumberOfWords("little_women.txt"))
-# print(little_women.getTotalUniqueWords("little_women.txt"))
-# print(little_women.get20MostFrequentWords("little_women.txt"))
-# print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
-# print(little_women.get20LeastFrequentWords("little_women.txt"))
+print(little_women.getTotalNumberOfWords("little_women.txt"))
+print(little_women.getTotalUniqueWords("little_women.txt"))
+print(little_women.get20MostFrequentWords("little_women.txt"))
+print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
+print(little_women.get20LeastFrequentWords("little_women.txt"))
 print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
 print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
-# print(little_women.generateSentence("little_women.txt"))
-# print(little_women.getAutocompleteSentence("little_women.txt", "\"It's"))
+print(little_women.generateSentence("little_women.txt"))
+print(little_women.getAutocompleteSentence("little_women.txt", "\"It's"))
