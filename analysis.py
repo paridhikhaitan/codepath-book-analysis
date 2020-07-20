@@ -1,9 +1,30 @@
+from __future__ import unicode_literals, print_function
+# from spacy.lang.en import English # updated
 import string
 from collections import Counter
 from collections import defaultdict
 import heapq
 import random
 import re
+import nltk
+
+# Uncomment this if you need to download nltk
+'''
+I tried to use both nltk which is a Python library and 
+Regex to see the difference in how well they clear strings
+'''
+# import ssl
+
+# try:
+#     _create_unverified_https_context = ssl._create_unverified_context
+# except AttributeError:
+#     pass
+# else:
+#     ssl._create_default_https_context = _create_unverified_https_context
+
+# nltk.download()
+
+from nltk import sent_tokenize
 
 class LittleWomen:
     def __init__(self):
@@ -12,6 +33,7 @@ class LittleWomen:
     def readFile(self, file_name):
         file_obj = open(file_name, "r")
         data = file_obj.read().translate(self.remove)
+        file_obj.close()
         return data
 
     def getTotalNumberOfWords(self, file_name):
@@ -55,7 +77,7 @@ class LittleWomen:
         NUMBER_OF_ELEMENTS = 20
         heap = self.createWordHeap(file_name, False)
         return [[element[1], element[0]] for element in heapq.nsmallest(NUMBER_OF_ELEMENTS, heap)]
-    
+
     def getFrequencyOfWord(self, file_name, word):
         word = word.lower()
         data = self.readFile(file_name)
@@ -76,12 +98,12 @@ class LittleWomen:
         for index, chapter in enumerate(chapter_split):
             if quote in chapter:
                 return index - 1
-        
+
         return -1
 
     def generateSentence(self, file_name):
         data = self.readFile(file_name)
-        all_words = data.split()
+        all_words = data.lower().split()
         word_dict = defaultdict(list)
         word_counter = Counter(all_words)
 
@@ -92,28 +114,30 @@ class LittleWomen:
             curr_word_freq = (-word_counter[curr_word], curr_word)
 
             word_dict[prev_word].append(curr_word_freq)
-        
-        return self.createSentence("The", 20, word_dict)
-    
+
+        return self.createSentence("the", 20, word_dict)
+
     def createSentence(self, word, sentence_len, word_dict):
         sentence = []
         for i in range(sentence_len):
             sentence.append(word)
             next_word = heapq.heappop(word_dict[word])
             word = next_word[1]
-        
+
         return " ".join(sentence)+"."
 
     def getAutocompleteSentence(self, file_name, start_sentence):
         file_object = open(file_name, "r")
         data = file_object.read()
-        data = re.split('(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)', data)
+        data = sent_tokenize(data)
         self.root = TrieNode(-1)
 
-        for sentence in data:
-            self.createTree(sentence)
-        
-        self.allSentences(start_sentence)
+        for index, sentence in enumerate(data):
+            # sentence = sentence.replace("\n", " ")
+            if len(sentence) != 0:
+                self.createTree(sentence)
+
+        return self.allSentences(start_sentence)
 
     def createTree(self, sentence):
         temp = self.root
@@ -122,33 +146,38 @@ class LittleWomen:
             if char not in temp.children:
                 temp.children[char] = TrieNode(char)
             temp = temp.children[char]
-        
-        temp.end_of_word = True
-    
-    def allSentences(self, start_sentence):
 
-        temp = self.root
-        result_sentences = []
+        temp.end_of_word = True
+
+    def allSentences(self, start_sentence):
 
         def getTree():
             temp = self.root
             for char in start_sentence:
-                if char not in temp.children:
-                    return False
-                temp = temp.children[char]
-            
-        
+                if char in temp.children:
+                    temp = temp.children[char]
+                else:
+                    return -1
 
-        def remainingSentences(root, temp_sentence):
+            return temp
+
+        all_sentences = []
+
+        def allSentences(root, sentence):
             if root.end_of_word == True:
-                result_sentences.append(start_sentence+temp_sentence)
+                all_sentences.append(start_sentence + sentence)
             
-            for child in root.children:
-                remainingSentences(root.children[child], temp_sentence+child)
+            for char in root.children:
+                allSentences(root.children[char], sentence + char)
+
+        reduced_root = getTree()
+
+        if reduced_root != -1:
+            allSentences(reduced_root, "")
+            return all_sentences
+
+        return "No sentences that start with that!"
         
-        getTree()
-        remainingSentences(temp, "")
-        return result_sentences
 
 
 class TrieNode:
@@ -157,13 +186,14 @@ class TrieNode:
         self.val = val
         self.end_of_word = False
 
+
 little_women = LittleWomen()
-print(little_women.getTotalNumberOfWords("little_women.txt"))
-print(little_women.getTotalUniqueWords("little_women.txt"))
-print(little_women.get20MostFrequentWords("little_women.txt"))
-print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
-print(little_women.get20LeastFrequentWords("little_women.txt"))
-print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
-print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
-print(little_women.generateSentence("little_women.txt"))
-print(little_women.getAutocompleteSentence("little_women.txt", "\"It's"))
+# print(little_women.getTotalNumberOfWords("little_women.txt"))
+# print(little_women.getTotalUniqueWords("little_women.txt"))
+# print(little_women.get20MostFrequentWords("little_women.txt"))
+# print(little_women.get20MostInterestingFrequentWords("little_women.txt"))
+# print(little_women.get20LeastFrequentWords("little_women.txt"))
+# print(little_women.getFrequencyOfWord("little_women.txt", "meg"))
+# print(little_women.getChapterQuoteAppears("little_women.txt", "If that's the way he's going to grow up, I wish he'd stay a boy"))
+# print(little_women.generateSentence("little_women.txt"))
+print(little_women.getAutocompleteSentence("little_women.txt", "Here it is, and"))
